@@ -5,6 +5,9 @@
   "engines": {
     "npm": ">=7.0.0"
   },
+  "workspaces": [
+    "contracts"
+  ],
   "scripts": {
     "clean": "rimraf .next",
     "dev": "next dev",
