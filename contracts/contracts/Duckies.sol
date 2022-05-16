@@ -15,7 +15,7 @@ contract Duckies is Initializable, ERC20CappedUpgradeable, PausableUpgradeable, 
     // Affiliate Tree
     mapping(address => address) private _referrers;
     // Affiliate Payouts
-    uint32 private _payout = 500;
+    uint32 private _payout;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -28,6 +28,7 @@ contract Duckies is Initializable, ERC20CappedUpgradeable, PausableUpgradeable, 
         __Pausable_init();
         __Ownable_init();
 
+        _payout = 500;
         _mint(msg.sender, 44400000000000 * 10 ** decimals());
     }
 
