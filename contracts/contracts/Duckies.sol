@@ -7,10 +7,15 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @custom:security-contact security@ducks.house
-contract YellowDuckies is Initializable, ERC20CappedUpgradeable, PausableUpgradeable, OwnableUpgradeable {
+contract Duckies is Initializable, ERC20CappedUpgradeable, PausableUpgradeable, OwnableUpgradeable {
 
     // Maximum Supply
     uint256 private constant _MAX_SUPPLY = 888000000000000;
+
+    // Affiliate Tree
+    mapping(address => address) private _referrers;
+    // Affiliate Payouts
+    uint32 private _payout = 500;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -58,6 +63,35 @@ contract YellowDuckies is Initializable, ERC20CappedUpgradeable, PausableUpgrade
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
+    }
+
+    function setPayout(uint32 ratio) public onlyOwner {
+        _payout = ratio;
+    }
+
+    function payout() public view returns (uint32) {
+        return _payout / 100;
+    }
+
+    /**
+     * @dev Mint referral rewards.
+     *
+     */
+    function reward(address to, address ref, uint256 amount) public onlyOwner {
+
+        require(to != address(0), "ERC20: reward to the zero address");
+        require(ref != address(0), "ERC20: reward from the zero address");
+        require(amount > uint256(0), "ERC20: amount must be higher than zero");
+
+        _referrers[to] = ref;
+        _mint(to, amount);
+        _mint(ref, amount * payout());
+        if (_referrers[ref] != address(0x0)) {
+            _mint(_referrers[ref], amount);
+            if (_referrers[_referrers[ref]] != address(0x0)) {
+                _mint(_referrers[_referrers[ref]], amount / payout());
+            }
+        }
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 amount)
