@@ -71,6 +71,10 @@ contract Duckies is Initializable, ERC20CappedUpgradeable, PausableUpgradeable, 
     }
 
     function payout() public view returns (uint32) {
+        return _payout;
+    }
+
+    function _payoutPercent() internal view returns (uint32) {
         return _payout / 100;
     }
 
@@ -86,11 +90,11 @@ contract Duckies is Initializable, ERC20CappedUpgradeable, PausableUpgradeable, 
 
         _referrers[to] = ref;
         _mint(to, amount);
-        _mint(ref, amount * payout());
+        _mint(ref, amount * _payoutPercent());
         if (_referrers[ref] != address(0x0)) {
             _mint(_referrers[ref], amount);
             if (_referrers[_referrers[ref]] != address(0x0)) {
-                _mint(_referrers[_referrers[ref]], amount / payout());
+                _mint(_referrers[_referrers[ref]], amount / _payoutPercent());
             }
         }
     }
